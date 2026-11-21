@@ -103,9 +103,11 @@ class FrozenLake(Environment):
         
     def p(self, next_state, state, action):
         # TODO:
+        raise NotImplementedError
     
     def r(self, next_state, state, action):
         # TODO:
+        raise NotImplementedError
    
     def render(self, policy=None, value=None):
         if policy is None:
@@ -193,6 +195,30 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     for i in range(max_episodes):
         s = env.reset()
         # TODO:
+        # using epsilon-greedy policy to choose first action
+        if random_state.rand() < epsilon[i]:
+            a = random_state.randint(env.n_actions)
+        else:
+            a = q[s].argmax()
+
+        done = False
+        while not done: # not at terminating state 
+            next_s, reward, done = env.step(a)
+            one_step_return = reward
+            if not done: 
+                if random_state.rand() < epsilon[i]:
+                    next_a = random_state.randint(env.n_actions)
+                else:
+                    next_a = q[next_s].argmax()
+
+                one_step_return += gamma * q[next_s, next_a]
+
+            td_error = one_step_return - q[s, a]
+            q[s, a] += eta[i] * td_error
+
+            if not done:
+                s, a = next_s, next_a
+            
     
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
