@@ -183,6 +183,21 @@ def policy_improvement(env, policy, value, gamma):
     improved_policy = np.zeros(env.n_states, dtype=int)
 
     # TODO:
+    for s in range(env.n_states):
+        action_values = np.zeros(env.n_actions)
+
+        for a in range(env.n_actions):
+            for transition in env.P[s][a]:
+                probability, next_state, reward, terminated = transition
+
+                future_value = 0.0 if terminated else gamma * value[next_state]
+
+                action_values[a] += probability * (reward + future_value)
+
+        improved_policy[s] = np.argmax(action_values)
+
+    return improved_policy
+
 
     
 def policy_iteration(env, gamma, theta, max_iterations, policy=None):

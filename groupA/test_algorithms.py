@@ -61,5 +61,32 @@ def test_policy_evaluation():
     print("Policy evaluation passed!")
     print("Value:", value)
 
+# Test 2: Policy improvement
+
+def test_policy_improvement():
+    # Start with safe-path values
+    value = np.array([5.23, 4.7, 3.0])
+
+    policy = np.array([0, 0, 0])
+
+    improved_policy = policy_improvement(
+        env, policy, value, gamma
+    )
+
+    # Expected optimal actions:
+    # State 0 -> Action 0 (value 5.23 beats terminal reward 5)
+    # State 1 -> Action 0 (value 4.7 beats terminal reward 1)
+    # State 2 -> Action 1 (reward 10 beats reward 3)
+
+    expected = np.array([0, 0, 1])
+
+    assert np.array_equal(improved_policy, expected)
+
+    print("Policy improvement passed!")
+    print("Improved policy:", improved_policy)
+
+
+
 if __name__ == "__main__":
     test_policy_evaluation()
+    test_policy_improvement()
