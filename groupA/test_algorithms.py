@@ -84,9 +84,56 @@ def test_policy_improvement():
 
     print("Policy improvement passed!")
     print("Improved policy:", improved_policy)
+# Test 3: Policy iteration
 
+def test_policy_iteration():
+    # Start with the policy choosing action 0 everywhere
+    initial_policy = np.array([0, 0, 0])
 
+    policy, value = policy_iteration(
+        env,
+        gamma,
+        theta,
+        max_iterations,
+        initial_policy
+    )
+
+    expected_policy = np.array([0, 0, 1])
+    expected_value = np.array([10.9, 11.0, 10.0])
+
+    assert np.array_equal(policy, expected_policy)
+    assert np.allclose(value, expected_value, atol=1e-6)
+
+    print("Policy iteration passed!")
+    print("Optimal policy:", policy)
+    print("Optimal values:", value)
+    
+# Test 4: Value iteration
+
+def test_value_iteration():
+    policy, value = value_iteration(
+        env, gamma, theta, max_iterations
+    )
+
+    expected_policy = np.array([0, 0, 1])
+    expected_value = np.array([10.9, 11.0, 10.0])
+
+    print("\n--- VALUE ITERATION DEBUG ---")
+    print("Actual policy:", policy)
+    print("Actual values:", value)
+    print("Expected policy:", expected_policy)
+    print("Expected values:", expected_value)
+
+    print("Policy correct:", np.array_equal(policy, expected_policy))
+    print("Values correct:", np.allclose(value, expected_value, atol=1e-6))
+
+    assert np.array_equal(policy, expected_policy)
+    assert np.allclose(value, expected_value, atol=1e-6)
+
+    print("Value iteration passed!")
 
 if __name__ == "__main__":
     test_policy_evaluation()
     test_policy_improvement()
+    test_policy_iteration()
+    test_value_iteration()

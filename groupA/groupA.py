@@ -207,7 +207,22 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
         policy = np.array(policy, dtype=int)
     
     # TODO:
+    value = np.zeros(env.n_states, dtype=float)
 
+    for _ in range(max_iterations):
+        # Evaluate the current policy
+        value = policy_evaluation(
+            env, policy, gamma, theta, max_iterations
+        )
+
+        # Improve the current policy
+        new_policy = policy_improvement(env, policy, value, gamma)
+
+        # Stop if the policy no longer changes
+        if np.array_equal(policy, new_policy):
+            break
+
+        policy = new_policy
 
     return policy, value
     
@@ -218,7 +233,31 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         value = np.array(value, dtype=float)
     
     # TODO:
+        for _ in range(max_iterations):
+            delta = 0
 
+            for s in range(env.n_states):
+                old_value = value[s]
+
+                action_values = np.zeros(env.n_actions)
+
+                for a in range(env.n_actions):
+                    for transition in env.P[s][a]:
+                        probability, next_state, reward, terminated = transition
+
+                        future_value = 0.0 if terminated else gamma * value[next_state]
+
+                        action_values[a] += probability * (reward + future_value)
+
+                value[s] = np.max(action_values)
+
+                delta = max(delta, abs(old_value - value[s]))
+
+            if delta < theta:
+                break
+
+    # Extract the greedy policy from the converged value function
+    policy = policy_improvement(env, np.zeros(env.n_states, dtype=int), value, gamma)
 
     return policy, value
 
