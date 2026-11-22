@@ -154,6 +154,28 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
     value = np.zeros(env.n_states, dtype=float)
 
     # TODO:
+    for _ in range(max_iterations):
+        delta = 0
+
+        for s in range(env.n_states):
+            old_value = value[s]
+            action = policy[s]
+
+            new_value = 0.0
+
+            for transition in env.P[s][action]:
+                probability, next_state, reward, terminated = transition
+
+                future_value = 0.0 if terminated else gamma * value[next_state]
+
+                new_value += probability * (reward + future_value)
+
+            value[s] = new_value
+
+            delta = max(delta, abs(old_value - value[s]))
+
+        if delta < theta:
+            break
 
     return value
     
@@ -162,7 +184,6 @@ def policy_improvement(env, policy, value, gamma):
 
     # TODO:
 
-    return improved_policy
     
 def policy_iteration(env, gamma, theta, max_iterations, policy=None):
     if policy is None:
@@ -171,7 +192,8 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
         policy = np.array(policy, dtype=int)
     
     # TODO:
-        
+
+
     return policy, value
     
 def value_iteration(env, gamma, theta, max_iterations, value=None):
@@ -182,7 +204,9 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
     
     # TODO:
 
+
     return policy, value
+
 
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
