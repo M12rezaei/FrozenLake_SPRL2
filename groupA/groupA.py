@@ -236,6 +236,26 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     for i in range(max_episodes):
         s = env.reset()
         # TODO:
+
+        done = False
+        while not done:
+            # using epsilon-greedy policy to pick action
+            if random_state.rand() < epsilon[i]:
+                a = random_state.randint(env.n_actions)
+            else:
+                a = q[s].argmax()
+
+            next_s, reward, done = env.step(a)
+
+            one_step_return = reward
+            if not done:
+                # calculating one step return using next states highest actions value
+                one_step_return += gamma * q[next_s].max()
+
+            td_error = one_step_return - q[s, a]
+            q[s, a] += eta[i] * td_error
+
+            s = next_s
         
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
