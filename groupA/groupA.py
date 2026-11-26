@@ -90,7 +90,39 @@ class FrozenLake(Environment):
         
         self.absorbing_state = n_states - 1
         
-        # TODO:
+        n_rows, n_cols = self.lake.shape
+        self._p = np.zeros((n_states, n_states, n_actions), dtype=float)
+        self.P = {s: {a: [] for a in range(n_actions)} for s in range(n_states)}
+
+        # 0: up, 1: left, 2: down, 3: right
+        directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+
+        for state in range(n_states):
+            if state == self.absorbing_state or self.lake_flat[state] in ['#', '$']:
+                self._p[self.absorbing_state, state, :] = 1.0
+            else:
+                row, col = divmod(state, n_cols)
+                for action in range(n_actions):
+                    for move_dir, (dr, dc) in enumerate(directions):
+                        prob = (1.0 - self.slip) if move_dir == action else 0.0
+                        prob += self.slip / n_actions
+
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < n_rows and 0 <= nc < n_cols:
+                            next_state = nr * n_cols + nc
+                        else:
+                            next_state = state
+
+                        self._p[next_state, state, action] += prob
+
+        for s in range(n_states):
+            for a in range(n_actions):
+                for ns in range(n_states):
+                    prob = self._p[ns, s, a]
+                    if prob > 0:
+                        reward = 1.0 if (s < self.absorbing_state and self.lake_flat[s] == '$') else 0.0
+                        terminated = (ns == self.absorbing_state)
+                        self.P[s][a].append((prob, ns, reward, terminated))
         
         Environment.__init__(self, n_states, n_actions, max_steps, dist, seed=seed)
         
@@ -102,12 +134,12 @@ class FrozenLake(Environment):
         return state, reward, done
         
     def p(self, next_state, state, action):
-        # TODO:
-        raise NotImplementedError
-    
+        return self._p[next_state, state, action]
+
     def r(self, next_state, state, action):
-        # TODO:
-        raise NotImplementedError
+        if state < self.absorbing_state and self.lake_flat[state] == '$':
+            return 1.0
+        return 0.0
    
     def render(self, policy=None, value=None):
         if policy is None:
